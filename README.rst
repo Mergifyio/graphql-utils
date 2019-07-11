@@ -48,8 +48,8 @@ Example::
         }}
       }}""",
       iterable=userlist,
-      pageinfo_path=("pets", "pageInfo"),
       send_fn=requests_api,
+      pageinfo_path=("pets", "pageInfo"),
   )
 
 
