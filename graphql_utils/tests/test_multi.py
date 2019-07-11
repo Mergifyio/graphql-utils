@@ -3,33 +3,6 @@ import pytest
 from graphql_utils import multi
 
 
-def test_build_multi_query():
-    query = """repository(owner: "{owner}", name: "{name}") {{
-    name
-}}"""
-    repos = (
-        {
-            "owner": "jd",
-            "name": "foo",
-        },
-        {
-            "owner": "jd",
-            "name": "bar",
-        },
-    )
-    assert (
-        multi.build_multi_query(query, repos) ==
-        ["""{
-Q0: repository(owner: "jd", name: "foo") {
-    name
-}
-Q1: repository(owner: "jd", name: "bar") {
-    name
-}
-}"""]
-    )
-
-
 def test_multi_query_limit():
     Q0_first_result = {
         "Q0": {
@@ -76,7 +49,7 @@ Q0: repository(owner: "jd", name: "foo") {
 
         if send_fn_calls['call'] == 2:
             assert query == """{
-Q1: repository(owner: "jd", name: "bar") {
+Q0: repository(owner: "jd", name: "bar") {
              collaborators(first: 100) {
                 nodes {
                   login
@@ -91,7 +64,7 @@ Q1: repository(owner: "jd", name: "bar") {
             return {"data": Q1_first_result}
 
         assert query == """{
-Q1: repository(owner: "jd", name: "bar") {
+Q0: repository(owner: "jd", name: "bar") {
              collaborators(first: 100 after: "magic==" ) {
                 nodes {
                   login
@@ -197,7 +170,7 @@ Q1: repository(owner: "jd", name: "bar") {
             return {"data": first_result}
 
         assert query == """{
-Q1: repository(owner: "jd", name: "bar") {
+Q0: repository(owner: "jd", name: "bar") {
              collaborators(first: 100 after: "magic==" ) {
                 nodes {
                   login
