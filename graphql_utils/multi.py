@@ -3,7 +3,7 @@ def _build_queries_for_multi(query, iterable, extra_format=None):
         extra_format = {}
     return [
         query.format(**{**i, **extra_format})
-        for idx, i in enumerate(iterable)
+        for i in iterable
     ]
 
 
