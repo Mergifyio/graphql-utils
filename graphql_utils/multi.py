@@ -13,8 +13,8 @@ def _format_queries(queries):
     ) + "\n}"
 
 
-def multi_query(query, iterable, send_fn,
-                pageinfo_path=None, max_batch_size=100):
+async def multi_query(query, iterable, send_fn,
+                      pageinfo_path=None, max_batch_size=100):
     """Build a GraphQL query that encapsulates a query multiple times.
 
     The master query must contains a way to retrieve a `pageInfo` structure in
@@ -47,7 +47,7 @@ def multi_query(query, iterable, send_fn,
     while queries:
         batched_queries = queries[:max_batch_size]
         del queries[:max_batch_size]
-        response = send_fn(
+        response = await send_fn(
             _format_queries(
                 (query.format(after=after_key)
                  for query, after_key in batched_queries)

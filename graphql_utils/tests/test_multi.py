@@ -3,7 +3,7 @@ import pytest
 from graphql_utils import multi
 
 
-def test_multi_query_limit():
+async def test_multi_query_limit():
     Q0_first_result = {
         "Q0": {
             "collaborators": {
@@ -89,7 +89,7 @@ Q0: repository(owner: "jd", name: "bar") {
         },
     )
 
-    iterable_result = multi.multi_query(
+    iterable_result = await multi.multi_query(
         """repository(owner: "{owner}", name: "{name}") {{
              collaborators(first: 100{{after}}) {{
                 nodes {{
@@ -113,7 +113,7 @@ Q0: repository(owner: "jd", name: "bar") {
         next(iterable_result)
 
 
-def test_multi_query():
+async def test_multi_query():
     Q0_first_result = {
         "Q0": {
             "collaborators": {
@@ -195,7 +195,7 @@ Q0: repository(owner: "jd", name: "bar") {
         },
     )
 
-    iterable_result = multi.multi_query(
+    iterable_result = await multi.multi_query(
         """repository(owner: "{owner}", name: "{name}") {{
              collaborators(first: 100{{after}}) {{
                 nodes {{
