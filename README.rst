@@ -5,8 +5,8 @@
 .. image:: https://circleci.com/gh/Mergifyio/graphql-utils.svg?style=svg
    :target: https://circleci.com/gh/Mergifyio/graphql-utils
 
-.. image:: https://img.shields.io/endpoint.svg?url=https://gh.mergify.io/badges/Mergifyio/graphql-utils&style=flat
-   :target: https://mergify.io
+.. image:: https://img.shields.io/endpoint.svg?url=https://api.mergify.com/v1/badges/Mergifyio/graphql-utils&style=flat
+   :target: https://mergify.com
    :alt: Mergify Status
 
 The ``graphql-utils`` Python package is a collection of utilities function for
@@ -33,9 +33,14 @@ Example::
   def requests_api(query):
       return requests.post("https://myapi.com/graphql", json=query)
 
-  userlist = ("jd", "sileht", "foo", "bar")
+  userlist = (
+      {"login": "jd"},
+      {"login": "sileht"},
+      {"login": "foo"},
+      {"login": "bar"},
+  )
 
-  results = multi.multi_query("""
+  result_iterator = multi.multi_query("""
       user(login: "{login}") {{
         pets(first: 100{after}) {{
           nodes {{
