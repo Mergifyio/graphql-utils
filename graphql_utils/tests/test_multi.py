@@ -3,7 +3,8 @@ import pytest
 from graphql_utils import multi
 
 
-def test_multi_query_limit():
+@pytest.mark.asyncio
+async def test_multi_query_limit():
     Q0_first_result = {
         "Q0": {
             "collaborators": {
@@ -11,7 +12,7 @@ def test_multi_query_limit():
                 "pageInfo": {
                     "hasNextPage": False,
                     "endCursor": None,
-                }
+                },
             },
         },
     }
@@ -29,10 +30,12 @@ def test_multi_query_limit():
 
     send_fn_calls = {"call": 0}
 
-    def send_fn(query):
-        send_fn_calls['call'] += 1
-        if send_fn_calls['call'] == 1:
-            assert query == """{
+    async def send_fn(query):
+        send_fn_calls["call"] += 1
+        if send_fn_calls["call"] == 1:
+            assert (
+                query
+                == """{
 Q0: repository(owner: "jd", name: "foo") {
              collaborators(first: 100) {
                 nodes {
@@ -45,10 +48,13 @@ Q0: repository(owner: "jd", name: "foo") {
               }
         }
 }"""
+            )
             return {"data": Q0_first_result}
 
-        if send_fn_calls['call'] == 2:
-            assert query == """{
+        if send_fn_calls["call"] == 2:
+            assert (
+                query
+                == """{
 Q0: repository(owner: "jd", name: "bar") {
              collaborators(first: 100) {
                 nodes {
@@ -61,9 +67,12 @@ Q0: repository(owner: "jd", name: "bar") {
               }
         }
 }"""
+            )
             return {"data": Q1_first_result}
 
-        assert query == """{
+        assert (
+            query
+            == """{
 Q0: repository(owner: "jd", name: "bar") {
              collaborators(first: 100 after: "magic==" ) {
                 nodes {
@@ -76,6 +85,7 @@ Q0: repository(owner: "jd", name: "bar") {
               }
         }
 }"""
+        )
         return {"data": {}}
 
     repos = (
@@ -88,7 +98,6 @@ Q0: repository(owner: "jd", name: "bar") {
             "name": "bar",
         },
     )
-
     iterable_result = multi.multi_query(
         """repository(owner: "{owner}", name: "{name}") {{
              collaborators(first: 100{{after}}) {{
@@ -107,13 +116,14 @@ Q0: repository(owner: "jd", name: "bar") {
         max_batch_size=1,
     )
 
-    assert next(iterable_result) == Q0_first_result
-    assert next(iterable_result) == Q1_first_result
-    with pytest.raises(StopIteration):
-        next(iterable_result)
+    results = [result async for result in iterable_result]
+    assert len(results) == 2
+    assert results[0] == Q0_first_result
+    assert results[1] == Q1_first_result
 
 
-def test_multi_query():
+@pytest.mark.asyncio
+async def test_multi_query():
     Q0_first_result = {
         "Q0": {
             "collaborators": {
@@ -121,7 +131,7 @@ def test_multi_query():
                 "pageInfo": {
                     "hasNextPage": False,
                     "endCursor": None,
-                }
+                },
             },
         },
     }
@@ -140,10 +150,12 @@ def test_multi_query():
 
     send_fn_calls = {"call": 0}
 
-    def send_fn(query):
-        send_fn_calls['call'] += 1
-        if send_fn_calls['call'] == 1:
-            assert query == """{
+    async def send_fn(query):
+        send_fn_calls["call"] += 1
+        if send_fn_calls["call"] == 1:
+            assert (
+                query
+                == """{
 Q0: repository(owner: "jd", name: "foo") {
              collaborators(first: 100) {
                 nodes {
@@ -167,9 +179,12 @@ Q1: repository(owner: "jd", name: "bar") {
               }
         }
 }"""
+            )
             return {"data": first_result}
 
-        assert query == """{
+        assert (
+            query
+            == """{
 Q0: repository(owner: "jd", name: "bar") {
              collaborators(first: 100 after: "magic==" ) {
                 nodes {
@@ -182,6 +197,7 @@ Q0: repository(owner: "jd", name: "bar") {
               }
         }
 }"""
+        )
         return {"data": {}}
 
     repos = (
@@ -212,6 +228,6 @@ Q0: repository(owner: "jd", name: "bar") {
         ("collaborators", "pageInfo"),
     )
 
-    assert next(iterable_result) == first_result
-    with pytest.raises(StopIteration):
-        next(iterable_result)
+    results = [result async for result in iterable_result]
+    assert len(results) == 1
+    assert results[0] == first_result
