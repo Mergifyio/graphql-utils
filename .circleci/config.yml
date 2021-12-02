@@ -1,33 +1,24 @@
 version: 2
 
 jobs:
-  py35:
+  py39:
     docker:
-      - image: circleci/python:3.5
+      - image: circleci/python:3.9
     steps:
       - checkout
       - run:
           command: |
             sudo pip install tox
-            tox -e py35
-  py36:
+            tox -e py39
+  py310:
     docker:
-      - image: circleci/python:3.6
+      - image: circleci/python:3.10
     steps:
       - checkout
       - run:
           command: |
             sudo pip install tox
-            tox -e py36
-  py37:
-    docker:
-      - image: circleci/python:3.7
-    steps:
-      - checkout
-      - run:
-          command: |
-            sudo pip install tox
-            tox -e py37
+            tox -e py310
   pep8:
     docker:
       - image: circleci/python:3.7
@@ -44,6 +35,5 @@ workflows:
   test:
     jobs:
       - pep8
-      - py35
-      - py36
-      - py37
+      - py39
+      - py310
